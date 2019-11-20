@@ -1,0 +1,333 @@
+process.env.NODE_ENV = "test";
+const chai = require("chai");
+const chaiSorted = require("chai-sorted");
+const { expect } = require("chai");
+const request = require("supertest");
+const app = require("../app");
+const connection = require("../connection");
+chai.use(chaiSorted);
+
+describe("/api", () => {
+  beforeEach(() => connection.seed.run());
+  after(() => {
+    return connection.destroy();
+  });
+  it("GET:404, route not found", () => {
+    return request(app)
+      .get("/api/bad-route")
+      .expect(404)
+      .then(body => {
+        expect(body.status).to.equal(404);
+        expect(body.body.msg).to.equal("Route not found.");
+      });
+  });
+  it("GET:404, route not found", () => {
+    return request(app)
+      .get("/extra-bad-route")
+      .expect(404)
+      .then(body => {
+        expect(body.status).to.equal(404);
+        expect(body.body.msg).to.equal("Route not found.");
+      });
+  });
+  it("GET:418, teapot found", () => {
+    return request(app)
+      .get("/api/teapot")
+      .expect(418)
+      .then(body => {
+        expect(body.status).to.equal(418);
+        expect(body.body.msg).to.equal("I'm a teapot.");
+      });
+  });
+  //
+  describe("/topics", () => {
+    it("GET:200, return all topics", () => {
+      return request(app)
+        .get("/api/topics")
+        .expect(200)
+        .then(body => {
+          expect(body).to.be.an("object");
+          expect(body.body.topics).to.be.an("array");
+          expect(body.body.topics[0].slug).to.equal("mitch");
+        });
+    });
+    it("DELETE:405, not a valid method", () => {
+      return request(app)
+        .delete("/api/topics")
+        .expect(405)
+        .then(body => {
+          expect(body.status).to.equal(405);
+          expect(body.body.msg).to.equal("Method denied.");
+        });
+    });
+  });
+  //
+  describe("/users", () => {
+    it("GET:200, return all users", () => {
+      return request(app)
+        .get("/api/users")
+        .expect(200)
+        .then(body => {
+          expect(body).to.be.an("object");
+          expect(body.body.users).to.be.an("array");
+          expect(body.body.users[0].username).to.equal("butter_bridge");
+        });
+    });
+    it("GET:200, return user by username", () => {
+      return request(app)
+        .get("/api/users/butter_bridge")
+        .expect(200)
+        .then(body => {
+          expect(body).to.be.an("object");
+          expect(body.body.user.username).to.equal("butter_bridge");
+        });
+    });
+    it("GET:404, a valid username that does not exist", () => {
+      return request(app)
+        .get("/api/users/not-a-real-username")
+        .expect(404)
+        .then(body => {
+          expect(body.status).to.equal(404);
+          expect(body.body.msg).to.equal("Username not found.");
+        });
+    });
+    it("DELETE:405, not a valid method", () => {
+      return request(app)
+        .delete("/api/users")
+        .expect(405)
+        .then(body => {
+          expect(body.status).to.equal(405);
+          expect(body.body.msg).to.equal("Method denied.");
+        });
+    });
+    it("DELETE:405, not a valid method", () => {
+      return request(app)
+        .delete("/api/users/butter_bridge")
+        .expect(405)
+        .then(body => {
+          expect(body.status).to.equal(405);
+          expect(body.body.msg).to.equal("Method denied.");
+        });
+    });
+  });
+  //
+  describe("/articles", () => {
+    it("GET:200, return article by article id", () => {
+      return request(app)
+        .get("/api/articles/1")
+        .expect(200)
+        .then(body => {
+          expect(body.body.article[0].comment_count).to.equal("18");
+        });
+    });
+    it("PATCH:200, update article votes by article id", () => {
+      return request(app)
+        .patch("/api/articles/1")
+        .send({ inc_votes: 10 })
+        .expect(200)
+        .then(body => {
+          expect(body.body.article[0].votes).to.equal(10);
+        });
+    });
+    it("PATCH:404, a valid id that does not exist", () => {
+      return request(app)
+        .patch("/api/articles/9000")
+        .send({ inc_votes: 10 })
+        .expect(404)
+        .then(body => {
+          expect(body.status).to.equal(404);
+          expect(body.body.msg).to.equal("Id not found.");
+        });
+    });
+    it("PATCH:400, an invalid id", () => {
+      return request(app)
+        .patch("/api/articles/banana")
+        .send({ inc_votes: 10 })
+        .expect(400)
+        .then(body => {
+          expect(body.status).to.equal(400);
+          expect(body.body.msg).to.equal("Not acceptable.");
+        });
+    });
+    it("PATCH:200, ignores a valid id with no votes property", () => {
+      return request(app)
+        .patch("/api/articles/1")
+        .send({})
+        .expect(200)
+        .then(body => {
+          expect(body.status).to.equal(200);
+        });
+    });
+    it("PATCH:400, a valid id with an invalid votes value", () => {
+      return request(app)
+        .patch("/api/articles/1")
+        .send({ inc_votes: "yes" })
+        .expect(400)
+        .then(body => {
+          expect(body.status).to.equal(400);
+          expect(body.body.msg).to.equal("Not acceptable.");
+        });
+    });
+    it("PATCH:200, update article votes by article id, ignoring invalid property", () => {
+      return request(app)
+        .patch("/api/articles/1")
+        .send({ inc_votes: 10, potato: "yes" })
+        .expect(200)
+        .then(body => {
+          expect(body.status).to.equal(200);
+        });
+    });
+    it("DELETE:405, not a valid method", () => {
+      return request(app)
+        .delete("/api/articles")
+        .expect(405)
+        .then(body => {
+          expect(body.status).to.equal(405);
+          expect(body.body.msg).to.equal("Method denied.");
+        });
+    });
+    it("DELETE:405, not a valid method", () => {
+      return request(app)
+        .delete("/api/articles/1")
+        .expect(405)
+        .then(body => {
+          expect(body.status).to.equal(405);
+          expect(body.body.msg).to.equal("Method denied.");
+        });
+    });
+    it("POST:201, posts a new comment", () => {
+      return request(app)
+        .post("/api/articles/1/comments")
+        .send({ username: "butter_bridge", body: "is here" })
+        .expect(201)
+        .then(body => {
+          expect(body.body.comment[0].author).to.equal("butter_bridge");
+        });
+    });
+    it("POST:400, posts a new comment without body and username", () => {
+      return request(app)
+        .post("/api/articles/1/comments")
+        .send({})
+        .expect(400)
+        .then(body => {
+          expect(body.status).to.equal(400);
+        });
+    });
+    it("GET:200, return all article comments", () => {
+      return request(app)
+        .get("/api/articles/1/comments")
+        .expect(200)
+        .then(body => {
+          expect(body).to.be.an("object");
+          expect(body.body.comments).to.be.an("array");
+          expect(body.body.comments[0].comment_id).to.equal(18);
+        });
+    });
+    it("GET:200, return all article comments sorted in default order", () => {
+      return request(app)
+        .get("/api/articles/1/comments")
+        .expect(200)
+        .then(body => {
+          expect(body.body.comments).to.be.sortedBy("comment_id", {
+            descending: true
+          });
+        });
+    });
+    it("GET:200, return all article comments sorted in ascending order by comment_id", () => {
+      return request(app)
+        .get("/api/articles/1/comments?sort_by=comment_id&order=asc")
+        .expect(200)
+        .then(body => {
+          expect(body.body.comments).to.be.sortedBy("comment_id");
+        });
+    });
+    it("GET:200, return all article comments sorted in descending order by votes", () => {
+      return request(app)
+        .get("/api/articles/1/comments?sort_by=votes&order=desc")
+        .expect(200)
+        .then(body => {
+          expect(body.body.comments).to.be.sortedBy("votes", {
+            descending: true
+          });
+        });
+    });
+    it("GET:200, return all articles sorted in default order", () => {
+      return request(app)
+        .get("/api/articles")
+        .expect(200)
+        .then(body => {
+          expect(body).to.be.an("object");
+          expect(body.body.articles).to.be.sortedBy("created_at");
+        });
+    });
+    it("GET:200, return all articles sorted in descending order by article_id", () => {
+      return request(app)
+        .get("/api/articles?sort_by=article_id&order=desc")
+        .expect(200)
+        .then(body => {
+          expect(body).to.be.an("object");
+          expect(body.body.articles).to.be.sortedBy("article_id", {
+            descending: true
+          });
+        });
+    });
+    it("GET:200, return all articles filtered by author", () => {
+      return request(app)
+        .get("/api/articles?author=butter_bridge")
+        .expect(200)
+        .then(body => {
+          expect(body).to.be.an("object");
+          expect(body.body.articles[0].title).to.equal("Moustache");
+        });
+    });
+    it("GET:200, return all articles filtered by topic", () => {
+      return request(app)
+        .get("/api/articles?topic=mitch")
+        .expect(200)
+        .then(body => {
+          expect(body).to.be.an("object");
+          expect(body.body.articles[0].author).to.equal("butter_bridge");
+        });
+    });
+  });
+  //
+  describe("/comments", () => {
+    it("GET:200, return all comments", () => {
+      return request(app)
+        .get("/api/comments")
+        .expect(200)
+        .then(body => {
+          //   console.log(body.body);
+          expect(body).to.be.an("object");
+          expect(body.body.comments).to.be.an("array");
+          expect(body.body.comments[0].comment_id).to.equal(1);
+        });
+    });
+    it("DELETE:405, not a valid method", () => {
+      return request(app)
+        .delete("/api/comments")
+        .expect(405)
+        .then(body => {
+          expect(body.status).to.equal(405);
+          expect(body.body.msg).to.equal("Method denied.");
+        });
+    });
+    it("PATCH:200, update comment votes by comment id", () => {
+      return request(app)
+        .patch("/api/comments/1")
+        .send({ inc_votes: -20 })
+        .expect(200)
+        .then(body => {
+          expect(body.body.comment[0].votes).to.equal(-20);
+        });
+    });
+    it("DELETE:204, delete comment by comment id", () => {
+      return request(app)
+        .delete("/api/comments/1")
+        .expect(204)
+        .then(body => {
+          expect(body.status).to.equal(204);
+        });
+    });
+  });
+});
