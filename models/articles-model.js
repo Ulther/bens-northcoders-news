@@ -30,7 +30,7 @@ exports.addNewComment = body => {
     .returning("*");
 };
 
-exports.getAllArticleComments = (sort_by, order) => {
+exports.getAllArticleComments = (sort_by, order, article_id) => {
   // console.log("Articles model here.");
   if (sort_by === undefined && order === undefined) {
     sort_by = "comment_id";
@@ -39,6 +39,7 @@ exports.getAllArticleComments = (sort_by, order) => {
   return connection
     .select("*")
     .from("comments")
+    .where("comments.article_id", article_id)
     .orderBy(sort_by, order)
     .returning("*");
 };

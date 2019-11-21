@@ -32,8 +32,12 @@ exports.deleteCommentbyId = (req, res, next) => {
   // console.log("Comments controller here.");
   const { comment_id } = req.params;
   destroyCommentbyId(comment_id)
-    .then(() => {
-      res.status(204).send({ msg: "Comment destroyed." });
+    .then(comment => {
+      if (comment === 0) {
+        res.status(404).send({ msg: "Id not found." });
+      } else {
+        res.status(204).send({ msg: "Comment destroyed." });
+      }
     })
     .catch(next);
 };

@@ -11,9 +11,12 @@ app.route("/*").all((req, res, next) => {
 });
 
 app.use((err, req, res, next) => {
-  const errorCodes = ["22P02"];
-  if (errorCodes.includes(err.code)) {
+  const errorCodes = ["22P02", "23503"];
+  if (errorCodes[0].includes(err.code)) {
     res.status(400).send({ msg: "Not acceptable." });
+  }
+  if (errorCodes[1].includes(err.code)) {
+    res.status(422).send({ msg: "Unprocessable Entity." });
   }
   next(err);
 });

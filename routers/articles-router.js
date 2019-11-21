@@ -5,7 +5,7 @@ const {
   sendArticleById,
   updateArticleById,
   postNewComment,
-  getAllArticleComments
+  sendAllArticleComments
 } = require("../controllers/articles-controller");
 
 articlesRouter
@@ -26,7 +26,7 @@ articlesRouter
 articlesRouter
   .route("/:article_id/comments")
   .post(postNewComment)
-  .get(getAllArticleComments)
+  .get(sendAllArticleComments)
   .all((req, res, next) => {
     res.status(405).send({ msg: "Method denied." });
   });

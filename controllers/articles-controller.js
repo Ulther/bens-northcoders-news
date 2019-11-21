@@ -6,14 +6,14 @@ const {
   getAllArticleComments
 } = require("../models/articles-model");
 
-exports.sendAllArticles = (req, res, next) => {
-  // console.log("Articles controller here.");
-  getAllArticles()
-    .then(articles => {
-      res.status(200).send({ articles });
-    })
-    .catch(next);
-};
+// exports.sendAllArticles = (req, res, next) => {
+//   // console.log("Articles controller here.");
+//   getAllArticles()
+//     .then(articles => {
+//       res.status(200).send({ articles });
+//     })
+//     .catch(next);
+// };
 
 exports.sendArticleById = (req, res, next) => {
   // console.log("Articles controller here.");
@@ -45,7 +45,7 @@ exports.postNewComment = (req, res, next) => {
   const comment = req.body;
   addNewComment(comment)
     .then(comment => {
-      // console.log(comment);
+      // console.log("Back to Controller.");
       if (comment[0].author === null || comment[0].body === null) {
         res.status(400).send({ msg: "Bad Request." });
       } else {
@@ -55,12 +55,15 @@ exports.postNewComment = (req, res, next) => {
     .catch(next);
 };
 
-exports.getAllArticleComments = (req, res, next) => {
+exports.sendAllArticleComments = (req, res, next) => {
   // console.log("Articles controller here.");
   const { sort_by, order } = req.query;
-  getAllArticleComments(sort_by, order)
+  const { article_id } = req.params;
+  getAllArticleComments(sort_by, order, article_id)
     .then(comments => {
-      res.status(200).send({ comments });
+      // console.log("Articles controller return.");
+      if (comments.length === 0) res.status(404).send({ msg: "Not found." });
+      if (req.params.article_id) res.status(200).send({ comments });
     })
     .catch(next);
 };

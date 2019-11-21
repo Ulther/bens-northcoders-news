@@ -112,7 +112,7 @@ describe("/api", () => {
   });
   //
   describe("/articles", () => {
-    it("GET:200, return article by article id", () => {
+    it("GET:200, return article by article_id", () => {
       return request(app)
         .get("/api/articles/1")
         .expect(200)
@@ -120,7 +120,7 @@ describe("/api", () => {
           expect(body.body.article[0].comment_count).to.equal("18");
         });
     });
-    it("PATCH:200, update article votes by article id", () => {
+    it("PATCH:200, update article votes by article_id", () => {
       return request(app)
         .patch("/api/articles/1")
         .send({ inc_votes: 10 })
@@ -168,7 +168,7 @@ describe("/api", () => {
           expect(body.body.msg).to.equal("Not acceptable.");
         });
     });
-    it("PATCH:200, update article votes by article id, ignoring invalid property", () => {
+    it("PATCH:200, update article votes by article_id, ignoring invalid property", () => {
       return request(app)
         .patch("/api/articles/1")
         .send({ inc_votes: 10, potato: "yes" })
@@ -213,6 +213,24 @@ describe("/api", () => {
           expect(body.status).to.equal(400);
         });
     });
+    it("POST:400, posts a new comment with an invalid username", () => {
+      return request(app)
+        .post("/api/articles/1/comments")
+        .send({ username: "ben", body: "is here" })
+        .expect(422)
+        .then(body => {
+          expect(body.status).to.equal(422);
+        });
+    });
+    it("POST:400, when article_id is invalid", () => {
+      return request(app)
+        .post("/api/articles/banana/comments")
+        .expect(400)
+        .then(body => {
+          expect(body.status).to.equal(400);
+          expect(body.body.msg).to.equal("Bad Request.");
+        });
+    });
     it("GET:200, return all article comments", () => {
       return request(app)
         .get("/api/articles/1/comments")
@@ -221,6 +239,24 @@ describe("/api", () => {
           expect(body).to.be.an("object");
           expect(body.body.comments).to.be.an("array");
           expect(body.body.comments[0].comment_id).to.equal(18);
+        });
+    });
+    it("GET:400, when article_id is invalid", () => {
+      return request(app)
+        .get("/api/articles/banana/comments")
+        .expect(400)
+        .then(body => {
+          expect(body.status).to.equal(400);
+          expect(body.body.msg).to.equal("Not acceptable.");
+        });
+    });
+    it("GET:404, when article_id does not exist", () => {
+      return request(app)
+        .get("/api/articles/9000/comments")
+        .expect(404)
+        .then(body => {
+          expect(body.status).to.equal(404);
+          expect(body.body.msg).to.equal("Not found.");
         });
     });
     it("GET:200, return all article comments sorted in default order", () => {
@@ -251,6 +287,7 @@ describe("/api", () => {
           });
         });
     });
+
     it("GET:200, return all articles sorted in default order", () => {
       return request(app)
         .get("/api/articles")
@@ -321,12 +358,56 @@ describe("/api", () => {
           expect(body.body.comment[0].votes).to.equal(-20);
         });
     });
+    it("PATCH:200, ignores a valid id with no votes property", () => {
+      return request(app)
+        .patch("/api/comments/1")
+        .send({})
+        .expect(200)
+        .then(body => {
+          expect(body.status).to.equal(200);
+        });
+    });
+    it("PATCH:400, a valid id with an invalid votes value", () => {
+      return request(app)
+        .patch("/api/comments/1")
+        .send({ inc_votes: "yes" })
+        .expect(400)
+        .then(body => {
+          expect(body.status).to.equal(400);
+          expect(body.body.msg).to.equal("Not acceptable.");
+        });
+    });
+    it("PATCH:200, update comment votes by comment_id, ignoring invalid property", () => {
+      return request(app)
+        .patch("/api/comments/1")
+        .send({ inc_votes: 10, potato: "yes" })
+        .expect(200)
+        .then(body => {
+          expect(body.status).to.equal(200);
+        });
+    });
     it("DELETE:204, delete comment by comment id", () => {
       return request(app)
         .delete("/api/comments/1")
         .expect(204)
         .then(body => {
           expect(body.status).to.equal(204);
+        });
+    });
+    it("DELETE:404, delete comment by comment id which does not exist", () => {
+      return request(app)
+        .delete("/api/comments/9000")
+        .expect(404)
+        .then(body => {
+          expect(body.status).to.equal(404);
+        });
+    });
+    it("DELETE:400, delete comment by comment id which is invalid", () => {
+      return request(app)
+        .delete("/api/comments/banana")
+        .expect(400)
+        .then(body => {
+          expect(body.status).to.equal(400);
         });
     });
   });
