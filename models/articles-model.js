@@ -32,8 +32,23 @@ exports.addNewComment = body => {
 
 exports.getAllArticleComments = (sort_by, order, article_id) => {
   // console.log("Articles model here.");
-  if (sort_by === undefined && order === undefined) {
-    sort_by = "comment_id";
+  if (sort_by === undefined) {
+    sort_by = "created_at";
+  }
+  if (order === undefined) {
+    order = "desc";
+  }
+  if (
+    sort_by !== "comment_id" &&
+    sort_by !== "article_id" &&
+    sort_by !== "body" &&
+    sort_by !== "votes" &&
+    sort_by !== "author" &&
+    sort_by !== "created_at"
+  ) {
+    sort_by = "created_at";
+  }
+  if (order !== "asc" && order !== "desc") {
     order = "desc";
   }
   return connection
@@ -46,16 +61,32 @@ exports.getAllArticleComments = (sort_by, order, article_id) => {
 
 exports.getAllArticles = (topic, author, sort_by, order) => {
   // console.log("Articles model here.");
-  if (sort_by === undefined && order === undefined) {
+  if (sort_by === undefined) {
     sort_by = "created_at";
-    order = "asc";
+  }
+  if (order === undefined) {
+    order = "desc";
+  }
+  if (
+    sort_by !== "article_id" &&
+    sort_by !== "title" &&
+    sort_by !== "body" &&
+    sort_by !== "votes" &&
+    sort_by !== "author" &&
+    sort_by !== "created_at" &&
+    sort_by !== "comment_count"
+  ) {
+    sort_by = "created_at";
+  }
+  if (order !== "asc" && order !== "desc") {
+    order = "desc";
   }
   return connection
     .select("articles.*")
     .from("articles")
-    .leftJoin("comments", "comments.article_id", "=", "articles.article_id")
+    .leftJoin("comments", "articles.article_id", "=", "comments.article_id")
     .groupBy("articles.article_id")
-    .count("comment_id as comment_count")
+    .count({ comment_count: "comment_id" })
     .orderBy(sort_by, order)
     .returning("*")
     .modify(query => {

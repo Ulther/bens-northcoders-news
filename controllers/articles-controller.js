@@ -6,21 +6,17 @@ const {
   getAllArticleComments
 } = require("../models/articles-model");
 
-// exports.sendAllArticles = (req, res, next) => {
-//   // console.log("Articles controller here.");
-//   getAllArticles()
-//     .then(articles => {
-//       res.status(200).send({ articles });
-//     })
-//     .catch(next);
-// };
-
 exports.sendArticleById = (req, res, next) => {
   // console.log("Articles controller here.");
   const { article_id } = req.params;
   getArticleById(article_id)
     .then(article => {
-      res.status(200).send({ article });
+      if (article.length === 0) {
+        res.status(404).send({ msg: "Id not found." });
+      } else {
+        // console.log("A>", {article:article[0]});
+        res.status(200).send({ article: article[0] });
+      }
     })
     .catch(next);
 };
@@ -34,7 +30,7 @@ exports.updateArticleById = (req, res, next) => {
       if (article.length === 0) {
         res.status(404).send({ msg: "Id not found." });
       } else {
-        res.status(200).send({ article });
+        res.status(200).send({ article: article[0] });
       }
     })
     .catch(next);
@@ -42,13 +38,18 @@ exports.updateArticleById = (req, res, next) => {
 
 exports.postNewComment = (req, res, next) => {
   // console.log("Articles controller here.");
+  // const { article_id } = req.params;
   const comment = req.body;
   addNewComment(comment)
     .then(comment => {
       // console.log("Back to Controller.");
       if (comment[0].author === null || comment[0].body === null) {
         res.status(400).send({ msg: "Bad Request." });
-      } else {
+      }
+      // if (articles.length === 0) {
+      //   res.status(404).send({ msg: "Not found." });
+      // } 
+      else {
         res.status(201).send({ comment });
       }
     })
@@ -73,6 +74,8 @@ exports.sendAllArticles = (req, res, next) => {
   const { topic, author, sort_by, order } = req.query;
   getAllArticles(topic, author, sort_by, order)
     .then(articles => {
+      // console.log("Articles controller return here.");
+      if (articles.length === 0) res.status(404).send({ msg: "Not found." });
       res.status(200).send({ articles });
     })
     .catch(next);

@@ -23,5 +23,19 @@
         }
       ]
     }
+  },
+  "GET /api/comments": {
+    "description": "serves an array of all comments",
+    "queries": [],
+    "exampleResponse": {
+      "comments": [
+        {
+          "author": "butter_bridge",
+          "votes": 10,
+          "body": "Text from the comment..",
+          "created_at": 1527695953341
+        }
+      ]
+    }
   }
 }

@@ -117,7 +117,7 @@ describe("/api", () => {
         .get("/api/articles/1")
         .expect(200)
         .then(body => {
-          expect(body.body.article[0].comment_count).to.equal("18");
+          expect(body.body.article.comment_count).to.equal("18");
         });
     });
     it("PATCH:200, update article votes by article_id", () => {
@@ -126,12 +126,22 @@ describe("/api", () => {
         .send({ inc_votes: 10 })
         .expect(200)
         .then(body => {
-          expect(body.body.article[0].votes).to.equal(10);
+          expect(body.body.article.votes).to.equal(10);
         });
     });
     it("PATCH:404, a valid id that does not exist", () => {
       return request(app)
         .patch("/api/articles/9000")
+        .send({ inc_votes: 10 })
+        .expect(404)
+        .then(body => {
+          expect(body.status).to.equal(404);
+          expect(body.body.msg).to.equal("Id not found.");
+        });
+    });
+    it("GET:404, a valid id that does not exist", () => {
+      return request(app)
+        .get("/api/articles/9000")
         .send({ inc_votes: 10 })
         .expect(404)
         .then(body => {
@@ -238,7 +248,7 @@ describe("/api", () => {
         .then(body => {
           expect(body).to.be.an("object");
           expect(body.body.comments).to.be.an("array");
-          expect(body.body.comments[0].comment_id).to.equal(18);
+          expect(body.body.comments[0].comment_id).to.equal(1);
         });
     });
     it("GET:400, when article_id is invalid", () => {
@@ -259,12 +269,23 @@ describe("/api", () => {
           expect(body.body.msg).to.equal("Not found.");
         });
     });
+    xit("POST:404, when article_id does not exist", () => {
+      return request(app)
+        .post("/api/articles/9000/comments")
+        .send({ username: "butter_bridge", body: "is here" })
+        .expect(404)
+        .then(body => {
+          expect(body.status).to.equal(404);
+          expect(body.body.msg).to.equal("Not found.");
+        });
+    });
     it("GET:200, return all article comments sorted in default order", () => {
       return request(app)
         .get("/api/articles/1/comments")
         .expect(200)
         .then(body => {
-          expect(body.body.comments).to.be.sortedBy("comment_id", {
+          // console.log(body.body);
+          expect(body.body.comments).to.be.sortedBy("created_at", {
             descending: true
           });
         });
@@ -277,24 +298,58 @@ describe("/api", () => {
           expect(body.body.comments).to.be.sortedBy("comment_id");
         });
     });
+    it("GET:200, return all article comments sorted by default in ascending order", () => {
+      return request(app)
+        .get("/api/articles/1/comments?order=asc")
+        .expect(200)
+        .then(body => {
+          // console.log(body.body.comments);
+          expect(body.body.comments).to.be.sortedBy("created_at");
+        });
+    });
+    it("GET:200, return all article comments sorted by default when passed an invalid order", () => {
+      return request(app)
+        .get("/api/articles/1/comments?order=banana")
+        .expect(200)
+        .then(body => {
+          // console.log(body.body.comments);
+          expect(body.body.comments).to.be.sortedBy("created_at", {
+            descending: true
+          });
+        });
+    });
     it("GET:200, return all article comments sorted in descending order by votes", () => {
       return request(app)
         .get("/api/articles/1/comments?sort_by=votes&order=desc")
         .expect(200)
         .then(body => {
+          // console.log(body.body)
           expect(body.body.comments).to.be.sortedBy("votes", {
             descending: true
           });
         });
     });
-
+    it("GET:200, return all article comments sorted in descending order by votes", () => {
+      return request(app)
+        .get("/api/articles/1/comments?sort_by=banana")
+        .expect(200)
+        .then(body => {
+          // console.log(body.body)
+          expect(body.body.comments).to.be.sortedBy("created_at", {
+            descending: true
+          });
+        });
+    });
     it("GET:200, return all articles sorted in default order", () => {
       return request(app)
         .get("/api/articles")
         .expect(200)
         .then(body => {
+          // console.log(body.body.articles);
           expect(body).to.be.an("object");
-          expect(body.body.articles).to.be.sortedBy("created_at");
+          expect(body.body.articles).to.be.sortedBy("created_at", {
+            descending: true
+          });
         });
     });
     it("GET:200, return all articles sorted in descending order by article_id", () => {
@@ -302,10 +357,53 @@ describe("/api", () => {
         .get("/api/articles?sort_by=article_id&order=desc")
         .expect(200)
         .then(body => {
+          // console.log(body.body.articles);
           expect(body).to.be.an("object");
           expect(body.body.articles).to.be.sortedBy("article_id", {
             descending: true
           });
+        });
+    });
+    it("GET:200, return all articles sorted in default order when passed invalid sort column", () => {
+      return request(app)
+        .get("/api/articles?sort_by=banana")
+        .expect(200)
+        .then(body => {
+          expect(body).to.be.an("object");
+          expect(body.body.articles).to.be.sortedBy("created_at", {
+            descending: true
+          });
+        });
+    });
+    it("GET:200, return all articles sorted in default order when passed invalid sort column", () => {
+      return request(app)
+        .get("/api/articles?order=banana")
+        .expect(200)
+        .then(body => {
+          expect(body).to.be.an("object");
+          expect(body.body.articles).to.be.sortedBy("created_at", {
+            descending: true
+          });
+        });
+    });
+    it("GET:200, return all articles sorted in descending order by author", () => {
+      return request(app)
+        .get("/api/articles?sort_by=author")
+        .expect(200)
+        .then(body => {
+          expect(body.body.articles).to.be.sortedBy("author", {
+            descending: true
+          });
+          expect(body.body.articles[0].author).to.be.equal("rogersop");
+        });
+    });
+    it("GET:200, return all articles sorted by default but in ascending order", () => {
+      return request(app)
+        .get("/api/articles?order=asc")
+        .expect(200)
+        .then(body => {
+          expect(body.body.articles).to.be.sortedBy("created_at");
+          expect(body.body.articles[0].author).to.be.equal("butter_bridge");
         });
     });
     it("GET:200, return all articles filtered by author", () => {
@@ -314,7 +412,18 @@ describe("/api", () => {
         .expect(200)
         .then(body => {
           expect(body).to.be.an("object");
-          expect(body.body.articles[0].title).to.equal("Moustache");
+          expect(body.body.articles[0].title).to.equal(
+            "Living in the shadow of a great man"
+          );
+        });
+    });
+    it("GET:404, an invalid author", () => {
+      return request(app)
+        .get("/api/articles?author=banana")
+        .expect(404)
+        .then(body => {
+          expect(body.status).to.equal(404);
+          expect(body.body.msg).to.equal("Not found.");
         });
     });
     it("GET:200, return all articles filtered by topic", () => {
@@ -326,6 +435,15 @@ describe("/api", () => {
           expect(body.body.articles[0].author).to.equal("butter_bridge");
         });
     });
+    it("GET:404, an invalid topic", () => {
+      return request(app)
+        .get("/api/articles?topic=banana")
+        .expect(404)
+        .then(body => {
+          expect(body.status).to.equal(404);
+          expect(body.body.msg).to.equal("Not found.");
+        });
+    });
   });
   //
   describe("/comments", () => {
@@ -334,7 +452,6 @@ describe("/api", () => {
         .get("/api/comments")
         .expect(200)
         .then(body => {
-          //   console.log(body.body);
           expect(body).to.be.an("object");
           expect(body.body.comments).to.be.an("array");
           expect(body.body.comments[0].comment_id).to.equal(1);
