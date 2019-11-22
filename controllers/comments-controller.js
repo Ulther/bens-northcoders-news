@@ -22,7 +22,7 @@ exports.updateCommentById = (req, res, next) => {
       if (comment.length === 0) {
         res.status(404).send({ msg: "Id not found." });
       } else {
-        res.status(200).send({ comment });
+        res.status(200).send({ comment: comment[0] });
       }
     })
     .catch(next);

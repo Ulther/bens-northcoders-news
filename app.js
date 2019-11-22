@@ -6,8 +6,12 @@ app.use(express.json());
 
 app.use("/api", apiRouter);
 
-app.route("/*").all((req, res, next) => {
+app.route("/*").get((req, res, next) => {
   res.status(404).send({ msg: "Route not found." });
+});
+
+app.route("/*").all((req, res, next) => {
+  res.status(405).send({ msg: "Method denied." });
 });
 
 app.use((err, req, res, next) => {

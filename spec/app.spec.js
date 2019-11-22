@@ -126,6 +126,7 @@ describe("/api", () => {
         .send({ inc_votes: 10 })
         .expect(200)
         .then(body => {
+          // console.log(body.body)
           expect(body.body.article.votes).to.equal(10);
         });
     });
@@ -165,6 +166,7 @@ describe("/api", () => {
         .send({})
         .expect(200)
         .then(body => {
+          // console.log(body.body);
           expect(body.status).to.equal(200);
         });
     });
@@ -198,6 +200,15 @@ describe("/api", () => {
     });
     it("DELETE:405, not a valid method", () => {
       return request(app)
+        .delete("/api")
+        .expect(405)
+        .then(body => {
+          expect(body.status).to.equal(405);
+          expect(body.body.msg).to.equal("Method denied.");
+        });
+    });
+    it("DELETE:405, not a valid method", () => {
+      return request(app)
         .delete("/api/articles/1")
         .expect(405)
         .then(body => {
@@ -211,6 +222,7 @@ describe("/api", () => {
         .send({ username: "butter_bridge", body: "is here" })
         .expect(201)
         .then(body => {
+          // console.log(body.body);
           expect(body.body.comment[0].author).to.equal("butter_bridge");
         });
     });
@@ -238,7 +250,7 @@ describe("/api", () => {
         .expect(400)
         .then(body => {
           expect(body.status).to.equal(400);
-          expect(body.body.msg).to.equal("Bad Request.");
+          expect(body.body.msg).to.equal("Not acceptable.");
         });
     });
     it("GET:200, return all article comments", () => {
@@ -251,6 +263,24 @@ describe("/api", () => {
           expect(body.body.comments[0].comment_id).to.equal(1);
         });
     });
+    it("GET:200, return empty array when no comments", () => {
+      return request(app)
+        .get("/api/articles/2/comments")
+        .expect(200)
+        .then(body => {
+          // console.log(body.body);
+          expect(body.body).to.be.an("array");
+        });
+    });
+    it("GET:200, when article_id does not exist", () => {
+      return request(app)
+        .get("/api/articles/9000/comments")
+        .expect(200)
+        .then(body => {
+          // console.log(body.body);
+          expect(body.status).to.equal(200);
+        });
+    });
     it("GET:400, when article_id is invalid", () => {
       return request(app)
         .get("/api/articles/banana/comments")
@@ -260,23 +290,15 @@ describe("/api", () => {
           expect(body.body.msg).to.equal("Not acceptable.");
         });
     });
-    it("GET:404, when article_id does not exist", () => {
-      return request(app)
-        .get("/api/articles/9000/comments")
-        .expect(404)
-        .then(body => {
-          expect(body.status).to.equal(404);
-          expect(body.body.msg).to.equal("Not found.");
-        });
-    });
-    xit("POST:404, when article_id does not exist", () => {
+    it("POST:422, when article_id does not exist", () => {
       return request(app)
         .post("/api/articles/9000/comments")
         .send({ username: "butter_bridge", body: "is here" })
-        .expect(404)
+        .expect(422)
         .then(body => {
-          expect(body.status).to.equal(404);
-          expect(body.body.msg).to.equal("Not found.");
+          // console.log(body.body);
+          expect(body.status).to.equal(422);
+          expect(body.body.msg).to.equal("Unprocessable Entity.");
         });
     });
     it("GET:200, return all article comments sorted in default order", () => {
@@ -469,10 +491,11 @@ describe("/api", () => {
     it("PATCH:200, update comment votes by comment id", () => {
       return request(app)
         .patch("/api/comments/1")
-        .send({ inc_votes: -20 })
+        .send({ inc_votes: 17 })
         .expect(200)
         .then(body => {
-          expect(body.body.comment[0].votes).to.equal(-20);
+          // console.log(body.body);
+          expect(body.body.comment.votes).to.equal(17);
         });
     });
     it("PATCH:200, ignores a valid id with no votes property", () => {
@@ -481,6 +504,7 @@ describe("/api", () => {
         .send({})
         .expect(200)
         .then(body => {
+          // console.log(body.body);
           expect(body.status).to.equal(200);
         });
     });

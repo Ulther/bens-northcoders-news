@@ -20,8 +20,9 @@ exports.patchArticleById = (article_id, votes = 0) => {
     .returning("*");
 };
 
-exports.addNewComment = body => {
+exports.addNewComment = (body, article_id) => {
   // console.log("Articles model here.");
+  body.article_id = article_id;
   body.author = body.username;
   delete body.username;
   return connection
