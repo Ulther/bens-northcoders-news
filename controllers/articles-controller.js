@@ -14,7 +14,6 @@ exports.sendArticleById = (req, res, next) => {
       if (article.length === 0) {
         res.status(404).send({ msg: "Id not found." });
       } else {
-        // console.log("A>", {article:article[0]});
         res.status(200).send({ article: article[0] });
       }
     })

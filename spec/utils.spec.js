@@ -11,7 +11,7 @@ This utility function should be able to take an array (`list`) of objects and re
 _hint: Think carefully about how you can test that this has worked - it's not by copying and pasting a sql timestamp from the terminal into your test_
 */
 
-describe.only("formatDates", () => {
+describe("formatDates", () => {
   it("returns an empty array when passed an empty array", () => {
     const input = [];
     const actual = formatDates(input);
@@ -114,7 +114,7 @@ Each formatted comment must have:
 - The rest of the comment's properties must be maintained
 */
 
-describe("formatComments", () => {
+describe.only("formatComments", () => {
   it("returns an empty array when passed an empty array", () => {
     const input = [];
     const actual = formatComments(input);
@@ -143,5 +143,30 @@ describe("formatComments", () => {
       }
     ];
     expect(actual).to.eql(expected);
+  });
+  it.only("checks for object mutation", () => {
+    const inputArr = [
+      {
+        body: "Nobis consequatur animi. Ullam nobis quaerat voluptates veniam.",
+        belongs_to: "Making sense of Redux",
+        created_by: "grumpy19",
+        votes: 7,
+        created_at: 1478813209256
+      }
+    ];
+    const refObj = { "Making sense of Redux": 2 };
+    const inputArrCopy = [
+      {
+        body: "Nobis consequatur animi. Ullam nobis quaerat voluptates veniam.",
+        belongs_to: "Making sense of Redux",
+        created_by: "grumpy19",
+        votes: 7,
+        created_at: 1478813209256
+      }
+    ];
+    const actual = formatComments(inputArr, refObj);
+    expect(inputArrCopy).to.eql(inputArr);
+    expect(actual).to.not.equal(inputArr);
+    expect(actual).to.not.eql(inputArr);
   });
 });

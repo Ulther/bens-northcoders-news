@@ -117,7 +117,8 @@ describe("/api", () => {
         .get("/api/articles/1")
         .expect(200)
         .then(body => {
-          expect(body.body.article.comment_count).to.equal("18");
+          // console.log(body.body);
+          expect(body.body.article.comment_count).to.equal("13");
         });
     });
     it("PATCH:200, update article votes by article_id", () => {
@@ -258,9 +259,10 @@ describe("/api", () => {
         .get("/api/articles/1/comments")
         .expect(200)
         .then(body => {
+          // console.log(body.body.comments);
           expect(body).to.be.an("object");
           expect(body.body.comments).to.be.an("array");
-          expect(body.body.comments[0].comment_id).to.equal(1);
+          expect(body.body.comments[0].comment_id).to.equal(2);
         });
     });
     it("GET:200, return empty array when no comments", () => {
@@ -367,7 +369,7 @@ describe("/api", () => {
         .get("/api/articles")
         .expect(200)
         .then(body => {
-          // console.log(body.body.articles);
+          console.log(body.body.articles[0]);
           expect(body).to.be.an("object");
           expect(body.body.articles).to.be.sortedBy("created_at", {
             descending: true

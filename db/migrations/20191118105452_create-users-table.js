@@ -4,7 +4,6 @@ exports.up = function(knex) {
     usersTable
       .string("username")
       .primary()
-      .notNullable();
     usersTable.string("avatar_url");
     usersTable.string("name");
   });
