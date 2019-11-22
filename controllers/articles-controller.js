@@ -46,7 +46,7 @@ exports.postNewComment = (req, res, next) => {
         res.status(404).send({ msg: "Not found." });
       }
       if (req.params.article_id && req.body.author && req.body.body)
-        res.status(201).send({ comment });
+      res.status(201).send({ comment: comment[0] });
       if (comment[0].author === null || comment[0].body === null) {
         res.status(400).send({ msg: "Bad Request." });
       }
@@ -62,6 +62,7 @@ exports.sendAllArticleComments = (req, res, next) => {
     .then(comments => {
       // console.log("Articles controller return.");
       // console.log(article_id);
+      // console.log(comments);
       if (req.params.article_id === article_id && comments.length === 0)
         res.status(200).send([]);
       if (comments.length === 0) res.status(404).send({ msg: "Not found." });
@@ -76,7 +77,8 @@ exports.sendAllArticles = (req, res, next) => {
   getAllArticles(topic, author, sort_by, order)
     .then(articles => {
       // console.log("Articles controller return here.");
-      if (articles.length === 0) res.status(404).send({ msg: "Not found." });
+      if (articles.length === 0) res.status(200).send([]);
+      // if (articles.length === 0) res.status(404).send({ msg: "Not found." });
       res.status(200).send({ articles });
     })
     .catch(next);

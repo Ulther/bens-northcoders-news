@@ -13,11 +13,13 @@ exports.getArticleById = article_id => {
 
 exports.patchArticleById = (article_id, votes = 0) => {
   // console.log("Articles model here.");
-  return connection
-    .from("articles")
-    .where("article_id", article_id)
-    .update({ votes: votes })
-    .returning("*");
+  return (
+    connection
+      .from("articles")
+      .where("article_id", article_id)
+      .increment("votes", votes)
+      .returning("*")
+  );
 };
 
 exports.addNewComment = (body, article_id) => {

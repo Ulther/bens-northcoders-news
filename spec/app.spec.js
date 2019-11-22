@@ -128,7 +128,7 @@ describe("/api", () => {
         .expect(200)
         .then(body => {
           // console.log(body.body)
-          expect(body.body.article.votes).to.equal(10);
+          expect(body.body.article.votes).to.equal(110);
         });
     });
     it("PATCH:404, a valid id that does not exist", () => {
@@ -224,7 +224,7 @@ describe("/api", () => {
         .expect(201)
         .then(body => {
           // console.log(body.body);
-          expect(body.body.comment[0].author).to.equal("butter_bridge");
+          expect(body.body.comment.author).to.equal("butter_bridge");
         });
     });
     it("POST:400, posts a new comment without body and username", () => {
@@ -274,13 +274,13 @@ describe("/api", () => {
           expect(body.body).to.be.an("array");
         });
     });
-    it("GET:200, when article_id does not exist", () => {
+    xit("GET:404, when article_id does not exist", () => {
       return request(app)
-        .get("/api/articles/9000/comments")
-        .expect(200)
+        .get("/api/articles/1000/comments")
+        .expect(404)
         .then(body => {
           // console.log(body.body);
-          expect(body.status).to.equal(200);
+          expect(body.status).to.equal(404);
         });
     });
     it("GET:400, when article_id is invalid", () => {
@@ -369,7 +369,7 @@ describe("/api", () => {
         .get("/api/articles")
         .expect(200)
         .then(body => {
-          console.log(body.body.articles[0]);
+          // console.log(body.body.articles[0]);
           expect(body).to.be.an("object");
           expect(body.body.articles).to.be.sortedBy("created_at", {
             descending: true
@@ -444,10 +444,9 @@ describe("/api", () => {
     it("GET:404, an invalid author", () => {
       return request(app)
         .get("/api/articles?author=banana")
-        .expect(404)
+        .expect(200)
         .then(body => {
-          expect(body.status).to.equal(404);
-          expect(body.body.msg).to.equal("Not found.");
+          expect(body.status).to.equal(200);
         });
     });
     it("GET:200, return all articles filtered by topic", () => {
@@ -462,10 +461,9 @@ describe("/api", () => {
     it("GET:404, an invalid topic", () => {
       return request(app)
         .get("/api/articles?topic=banana")
-        .expect(404)
+        .expect(200)
         .then(body => {
-          expect(body.status).to.equal(404);
-          expect(body.body.msg).to.equal("Not found.");
+          expect(body.status).to.equal(200);
         });
     });
   });
