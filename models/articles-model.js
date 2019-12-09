@@ -13,13 +13,11 @@ exports.getArticleById = article_id => {
 
 exports.patchArticleById = (article_id, votes = 0) => {
   // console.log("Articles model here.");
-  return (
-    connection
-      .from("articles")
-      .where("article_id", article_id)
-      .increment("votes", votes)
-      .returning("*")
-  );
+  return connection
+    .from("articles")
+    .where("article_id", article_id)
+    .increment("votes", votes)
+    .returning("*");
 };
 
 exports.addNewComment = (body, article_id) => {
@@ -31,6 +29,16 @@ exports.addNewComment = (body, article_id) => {
     .from("comments")
     .insert(body)
     .returning("*");
+  // return Promise.all([comments, findArticle(article_id)]).then(
+  //   promiseResponse => {
+  //     if (promiseResponse[1].length === 0) {
+  //       return Promise.reject({ status: 404 });
+  //     }
+  //     else {
+  //       return promiseResponse[0];
+  //     }
+  //   }
+  // );
 };
 
 exports.getAllArticleComments = (sort_by, order, article_id) => {
@@ -54,12 +62,30 @@ exports.getAllArticleComments = (sort_by, order, article_id) => {
   if (order !== "asc" && order !== "desc") {
     order = "desc";
   }
-  return connection
+
+  const comments = connection
     .select("*")
     .from("comments")
     .where("comments.article_id", article_id)
     .orderBy(sort_by, order)
-    .returning("*");
+
+  return Promise.all([comments, findArticle(article_id)]).then(
+    promiseResponse => {
+      if (promiseResponse[1].length === 0) {
+        return Promise.reject({ status: 404 });
+      }
+      else {
+        return promiseResponse[0];
+      }
+    }
+  );
+};
+
+findArticle = article_id => {
+  return connection
+    .select("article_id")
+    .from("articles")
+    .where("articles.article_id", article_id);
 };
 
 exports.getAllArticles = (topic, author, sort_by, order) => {

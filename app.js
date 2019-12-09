@@ -1,6 +1,7 @@
 const express = require("express");
 const app = express();
 const apiRouter = require("./routers/api-router");
+const { handleCustomErrors } = require("./errors/error-handling");
 
 app.use(express.json());
 
@@ -11,11 +12,16 @@ app.route("/*").get((req, res, next) => {
 });
 
 app.route("/*").all((req, res, next) => {
+  console.log("this");
   res.status(405).send({ msg: "Method denied." });
 });
 
 app.use((err, req, res, next) => {
   const errorCodes = ["22P02", "23503"];
+  // console.log(err);
+  if (err.status === 404) {
+    res.status(404).send({ msg: "Not found." });
+  }
   if (errorCodes[0].includes(err.code)) {
     res.status(400).send({ msg: "Not acceptable." });
   }
@@ -30,5 +36,7 @@ app.use((err, req, res, next) => {
   // console.log(err);
   res.status(500).send({ msg: "Internal Server Error!" });
 });
+
+app.use(handleCustomErrors);
 
 module.exports = app;

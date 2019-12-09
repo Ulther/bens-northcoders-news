@@ -271,10 +271,10 @@ describe("/api", () => {
         .expect(200)
         .then(body => {
           // console.log(body.body);
-          expect(body.body).to.be.an("array");
+          expect(body.body.comments).to.be.an("array");
         });
     });
-    xit("GET:404, when article_id does not exist", () => {
+    it("GET:404, when article_id does not exist", () => {
       return request(app)
         .get("/api/articles/1000/comments")
         .expect(404)
@@ -446,6 +446,7 @@ describe("/api", () => {
         .get("/api/articles?author=banana")
         .expect(200)
         .then(body => {
+          // console.log(body.body)
           expect(body.status).to.equal(200);
         });
     });
