@@ -1,8 +1,8 @@
 const express = require("express");
+const cors = require("cors");
 const app = express();
 const apiRouter = require("./routers/api-router");
 const { handleCustomErrors } = require("./errors/error-handling");
-const cors = require("cors");
 
 app.use(cors());
 
