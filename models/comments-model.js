@@ -13,7 +13,7 @@ exports.patchCommentById = (comment_id, votes = 0) => {
   return connection
     .from("comments")
     .where("comment_id", comment_id)
-    .update({ votes: votes })
+    .increment({ votes: votes })
     .returning("*");
 };
 
