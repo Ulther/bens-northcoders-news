@@ -8,7 +8,7 @@ GitHub Back End: https://github.com/Ulther/bens-northcoders-news
 
 # About:
 
-Northcoders News is hosted on Heroku, it consists of a back end database and a front end web app. It is designed to for the user to be able to access various news articles and their comments from the web.
+Northcoders News is hosted on Heroku, it consists of a back end database and a front end web app. It is designed for the user to be able to access various news articles and their comments from the web.
 
 # Node:
 
