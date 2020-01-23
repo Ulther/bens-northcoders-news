@@ -8,20 +8,12 @@ GitHub Front End: https://github.com/Ulther/bens-nc-news
 
 GitHub Back End: https://github.com/Ulther/bens-northcoders-news
 
-# Getting Started:
-
-Text.
-
-# How to run:
-
-Text.
-
 ### Prerequisites
 
-What things you need to install the software and how to install them
+To install and run Northcoders News you will need Node.js
 
 ```
-Give examples
+Version 12.14. 0 (2019-12-17)
 ```
 
 ### Installing
