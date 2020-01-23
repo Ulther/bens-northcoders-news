@@ -10,46 +10,28 @@ GitHub Back End: https://github.com/Ulther/bens-northcoders-news
 
 ### Prerequisites
 
-To install and run Northcoders News you will need Node.js
+To install and run Northcoders News you will need Node.js, please ensure you are using version:
 
 ```
-Version 12.14. 0 (2019-12-17)
+12.14. 0 (2019-12-17)
 ```
 
 ### Installing
 
-A step by step series of examples that tell you how to get a development env running
-
-Say what the step will be
+Start by cloning the repository onto your local machine, run in the terminal:
 
 ```
-Give the example
+git clone https://github.com/Ulther/bens-northcoders-news.git
 ```
 
-And repeat
+Then you will need to install dependencies, in the route folder of the repository run in the terminal:
 
 ```
-until finished
+npm install
 ```
-
-End with an example of getting some data out of the system or using it for a little demo
-
-## Running the tests
-
-Explain how to run the automated tests for this system
-
-### Break down into end to end tests
-
-Explain what these tests test and why
+Then you will need to launch the app, in the route folder of the repository run in the terminal:
 
 ```
-Give an example
+npm start
 ```
 
-### And coding style tests
-
-Explain what these tests test and why
-
-```
-Give an example
-```
